@@ -65,6 +65,7 @@ public:
         KW_end,
         KW_and,
         KW_or,
+        KW_colon,
 
     };
 

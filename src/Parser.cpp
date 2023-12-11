@@ -20,13 +20,13 @@ AST *Parser::parseGSM()
             if (d1)
                 exprs.push_back(d1);
             else
-                goto _error2;
+                goto _error();
             break;
 
             if (!Tok.is(Token::semicolon))
             {
-                error();
-                goto _error2;
+               // error();
+                goto _error();
             }
 
         case Token::id:
@@ -35,13 +35,13 @@ AST *Parser::parseGSM()
             if (d2)
                 exprs.push_back(d2);
             else
-                goto _error2;
+                goto _error();
             break;
 
             if (!Tok.is(Token::semicolon))
             {
-                error();
-                goto _error2;
+                //error();
+                goto _error();
             }
 
         case Token::KW_loopc:
@@ -50,7 +50,7 @@ AST *Parser::parseGSM()
             if (d3)
                 exprs.push_back(d3);
             else
-                goto _error2;
+                goto _error();
             break;
 
             /*if (!Tok.is(Token::semicolon))
@@ -64,7 +64,7 @@ AST *Parser::parseGSM()
             if (d4)
                 exprs.push_back(d4);
             else
-                goto _error2;
+                goto _error();
             break;
 
             // if (!Tok.is(Token::semicolon))
@@ -73,7 +73,7 @@ AST *Parser::parseGSM()
             //     goto _error2;
             // }
         default:
-            goto _error2;
+            goto _error();
             break;
         }
         advance(); // TODO: watch this part
@@ -94,12 +94,12 @@ Expr *Parser::parseDec()
 
     advance();
     if (expect(Token::KW_int))
-        goto _error;
+        goto _error();
 
     advance();
 
     if (expect(Token::id))
-        goto _error;
+        goto _error();
     Vars.push_back(Tok.getText());
     advance();
 
@@ -107,7 +107,7 @@ Expr *Parser::parseDec()
     {
         advance();
         if (expect(Token::id))
-            goto _error;
+            goto _error();
         Vars.push_back(Tok.getText());
         advance();
     }
@@ -120,7 +120,7 @@ Expr *Parser::parseDec()
     }
 
     if (expect(Token::semicolon))
-        goto _error;
+        goto _error();
 
     return new Declaration(Vars, E);
 _error: // TODO: Check this later in case of error :)
@@ -132,22 +132,56 @@ _error: // TODO: Check this later in case of error :)
 Expr *Parser::parseEquation()
 {
     Expr *E;
-    Final *Fi;
-   // F = (Factor *)(parseFactor());
+    BinaryOp::Operator Op;
 
-    if (!Tok.is(Token::id) && !Tok.is(Token::num) && !Tok.is(Token::l_paren))
+    if (!Tok.is(Token::id) /*&& !Tok.is(Token::num) && !Tok.is(Token::l_paren)*/)
     {
-        error();
-        return nullptr;
+        // error();
+        // return nullptr;
+        goto _error();
     }
 
     advance();           // id += 2;
-    E = parseExpr();
-    Fi = parseFinal();
-    if (expect(Token::semicolon))
-        goto _error;
+    
+    //Fi = parseFinal();
 
-    return new Equation(Fi, E); //MUST EDIT AST
+
+    while (Tok.isOneOf(Token::plus, Token::minus , Token::equal, Token::power, Token::star, Token::slash , Token::KW_mod, Token::KW_plusEqual, Token::KW_minusEqual ,Token::KW_starEqual ,Token::KW_slashEqual , Token::KW_modEq)){
+        
+            //Tok.is(Token::star) ? BinaryOp::star : BinaryOp::slash;
+            if (Tok.is(Token::plus)) 
+                Op = BinaryOp::Operator::Plus;
+            else if (Tok.is(Token::minus))  
+                Op =  BinaryOp::Operator::Minus;
+            else if (Tok.is(Token::equal))  
+                Op =  BinaryOp::Operator::equal;
+            else if (Tok.is(Token::power))  
+                Op =  BinaryOp::Operator::power;
+            else if (Tok.is(Token::star))  
+                Op =  BinaryOp::Operator::star;
+            else if (Tok.is(Token::slash))  
+                Op =  BinaryOp::Operator::slash;
+            else if (Tok.is(Token::KW_mod))  
+                Op =  BinaryOp::Operator::KW_mod; 
+            else if (Tok.is(Token::KW_plusEqual))  
+                Op =  BinaryOp::Operator::KW_plusEqual;   
+            else if (Tok.is(Token::KW_minusEqual))  
+                Op =  BinaryOp::Operator::KW_minusEqual;   
+            else if (Tok.is(Token::KW_starEqual))  
+                Op =  BinaryOp::Operator::KW_starEqual;   
+            else if (Tok.is(Token:: KW_slashEqual))  
+                Op =  BinaryOp::Operator::KW_slashEqual; 
+            else if (Tok.is(Token:: KW_modEq))  
+                Op =  BinaryOp::Operator::KW_modEq;   
+
+    }
+
+    E = parseExpr();
+    
+    if (expect(Token::semicolon))
+        goto _error();
+
+    return new Equation(Op,E); //MUST EDIT AST
 }
 
 Expr *Parser::parseExpr()
@@ -169,14 +203,14 @@ Expr *Parser::parseTerm()
     Expr *Left = parseFactor();
     while (Tok.isOneOf(Token::star, Token::slash , Token::KW_mod))
     {
-        BinaryOp::Operator Op =
+        BinaryOp::Operator Op;
             //Tok.is(Token::star) ? BinaryOp::star : BinaryOp::slash;
             if (Tok.is(Token::star)) 
-                Op::star;
+                Op = BinaryOp::Operator::star;
             else if (Tok.is(Token::slash))  
-                Op::slash;
+                Op =  BinaryOp::Operator::slash;
             else if (Tok.is(Token::KW_mod))  
-                Op::KW_mod;  
+                Op =  BinaryOp::Operator::KW_mod;  
 
 
         advance();
@@ -206,11 +240,11 @@ Expr *Parser::parseFinal()
     switch (Tok.getKind())
     {
     case Token::num:
-        Res = new Factor(Factor::num, Tok.getText());
+        Res = new Factor(Final::num, Tok.getText());
         advance();
         break;
     case Token::id:
-        Res = new Factor(Factor::id, Tok.getText());
+        Res = new Factor(Final::id, Tok.getText());
         advance();
         break;
     case Token::l_paren:
@@ -243,17 +277,17 @@ If *Parser::parseIf() {
     llvm::SmallVector<Elif *> Elifs;
     ElseParse *Else;
     if(expect(Token::KW_if))
-        goto _error;
+        goto _error();
 
     advance();
     
     if(expect(Token::KW_colon))
-        goto _error;
+        goto _error();
     
     advance();
 
      if(expect(Token::KW_begin))
-        goto _error;
+        goto _error();
     
     advance();
 
@@ -266,7 +300,7 @@ If *Parser::parseIf() {
 
 
     if(expect(Token::KW_end))
-        goto _error;
+        goto _error();
     
     advance();
 
@@ -297,17 +331,17 @@ Elif *Parser::parseElif()
     Conditions condits = parseConditions();
 
     if(expect(Token::KW_elif))
-        goto _error;
+        goto _error();
     
     advance();
 
     if(expect(Token::KW_colon))
-        goto _error;
+        goto _error();
     
     advance();
 
     if(expect(Token::KW_begin))
-        goto _error;
+        goto _error();
     
     advance();
 
@@ -317,7 +351,7 @@ Elif *Parser::parseElif()
         }
 
     if(expect(Token::KW_end))
-        goto _error;
+        goto _error();
     
     advance();
 
@@ -330,12 +364,12 @@ Elif *Parser::parseElif()
 Else *Parser::parseElse(){
     llvm::SmallVector<Equation *> Equations;
     if(expect(Token::KW_else))
-        goto _error;
+        goto _error();
     
     advance();
 
     if(expect(Token::KW_colon))
-        goto _error;
+        goto _error();
     
     advance();
 
@@ -347,7 +381,7 @@ Else *Parser::parseElse(){
 
 
     if(expect(Token::KW_end))
-        goto _error;
+        goto _error();
     
     advance();
 
@@ -364,7 +398,7 @@ Else *Parser::parseElse(){
 Conditions *Parser::parseConditions(){
 
 
-    conditions *Left = parseCondition();
+    Conditions *Left = parseCondition();
     while (Tok.isOneOf(Token::KW_and , Token::KW_or)){
         Conditions :: andOr AO = 
             Tok.is(Token::KW_and) ? Conditions::KW_and  : Conditions::KW_or;
@@ -397,7 +431,7 @@ Condition *Parser::parseCondition () {
             else if (Tok.is(Token::KW_greaterThan))  
                 Op= Condition::OperatorCondition::KW_greaterThan;
             else 
-                goto _error;
+                goto _error();
 
 
 
@@ -411,11 +445,65 @@ Condition *Parser::parseCondition () {
 
 }
 
+//----------------
+Loop *Parser:: parseLoop(){
+    Loop *Res = nullptr;
+    if(!Tok.is(Token::KW_loopc)){
+        goto _error();
 
-_error:
-    while (Tok.getKind() != Token :: eoi)
+    }
+    advance();
+
+    Conditions *Conditions = parseConditions;
+    advance();
+
+    if(!Tok.is(Token::KW_colon)){
+        goto _error();
+    }
+
+    advance();
+
+    if (!Tok.is(Token::KW_begin))
+    {
+        goto _error();
+    }
+    advance();
+    llvm::SmallVector<Equation*> Equ;
+
+    while(!Tok.is(Token::id)){
+        if(Tok.is(Token::id)){
+            Equation *e;
+            e = parseEquation();
+
+            if (!Tok.is(Token::semicolon))
+            {
+                goto _error;
+            }
+            if(e)
+            {
+                Equation.push_back(e);
+            }
+            
+        }
+    }
+
+    Res = new Loop(Conditions,Equation);
+    return Res;
+}
+
+
+
+_error():
+   { while (Tok.getKind() != Token::eoi)
     {
         advance();
     }
     return nullptr;
-    
+    }
+
+
+
+
+
+//-----------------------
+

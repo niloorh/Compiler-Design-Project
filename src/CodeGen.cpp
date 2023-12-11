@@ -62,7 +62,7 @@ namespace
       }
     };
 
-    virtual void visit(Assignment &Node) override
+    virtual void visit(Equation &Node) override
     {
       // Visit the right-hand side of the assignment and get its value.
       Node.getRight()->accept(*this);
@@ -84,12 +84,13 @@ namespace
       CallInst *Call = Builder.CreateCall(CalcWriteFnTy, CalcWriteFn, {val});
     };
 
-    virtual void visit(Factor &Node) override
+    virtual void visit(Final &Node) override
     {
-      if (Node.getKind() == Factor::Ident)
+      if (Node.getKind() == Final::id)
       {
         // If the factor is an identifier, load its value from memory.
         V = Builder.CreateLoad(Int32Ty, nameMap[Node.getVal()]);
+        
       }
       else
       {
@@ -102,6 +103,7 @@ namespace
 
     virtual void visit(BinaryOp &Node) override
     {
+      
       // Visit the left-hand side of the binary operation and get its value.
       Node.getLeft()->accept(*this);
       Value *Left = V;
@@ -119,11 +121,70 @@ namespace
       case BinaryOp::Minus:
         V = Builder.CreateNSWSub(Left, Right);
         break;
-      case BinaryOp::Mul:
+      case BinaryOp::equal:
         V = Builder.CreateNSWMul(Left, Right);
         break;
-      case BinaryOp::Div:
+      case BinaryOp::power:
         V = Builder.CreateSDiv(Left, Right);
+        break;
+      case BinaryOp::star:
+        V = Builder.CreateNSWAdd(Left, Right);
+        break;
+      case BinaryOp::slash:
+        V = Builder.CreateNSWSub(Left, Right);
+        break;
+      case BinaryOp::KW_mod:
+        V = Builder.CreateNSWMul(Left, Right);
+        break;
+      case BinaryOp::KW_plusEqual:
+        V = Builder.CreateSDiv(Left, Right);
+        break;
+      case BinaryOp::KW_minusEqual:
+        V = Builder.CreateNSWAdd(Left, Right);
+        break;
+      case BinaryOp::KW_starEqual:
+        V = Builder.CreateNSWSub(Left, Right);
+        break;
+      case BinaryOp::KW_slashEqual:
+        V = Builder.CreateNSWMul(Left, Right);
+        break;
+      case BinaryOp::KW_modEq:
+        V = Builder.CreateSDiv(Left, Right);
+        break;
+      }
+    };
+
+   virtual void visit(Condition &Node) override
+    {
+      
+      // Visit the left-hand side of the binary operation and get its value.
+      Node.getLeft()->accept(*this);
+      Value *Left = V;
+
+      // Visit the right-hand side of the binary operation and get its value.
+      Node.getRight()->accept(*this);
+      Value *Right = V;
+
+      // Perform the binary operation based on the operator type and create the corresponding instruction.
+      switch (Node.getOperator())
+      {
+      case Condition::KW_eqNot:
+        V = Builder.CreateNSWAdd(Left, Right);
+        break;
+          case Condition::KW_EqEq:
+        V = Builder.CreateNSWAdd(Left, Right);
+        break;
+             case Condition::KW_greaterEqual:
+        V = Builder.CreateNSWAdd(Left, Right);
+        break;
+             case Condition::KW_lessEqual:
+        V = Builder.CreateNSWAdd(Left, Right);
+        break;
+             case Condition::KW_greaterThan:
+        V = Builder.CreateNSWAdd(Left, Right);
+        break;
+             case Condition::KW_lessThan:
+        V = Builder.CreateNSWAdd(Left, Right);
         break;
       }
     };
@@ -170,3 +231,5 @@ void CodeGen::compile(AST *Tree)
   // Print the generated module to the standard output.
   M->print(outs(), nullptr);
 }
+
+

@@ -5,20 +5,19 @@
 #include "llvm/ADT/StringRef.h"
 
 // Forward declarations of classes used in the AST
-class AST;
-class Expr;
-class GSM;
-//class Factor;
-class BinaryOp;// male ina ta haminjast
-//class Assignment; // to do 
-class Declaration;
-class Final;
-class Equation;
+class AST; //h
+class Expr; 
+class GSM; //h
+class BinaryOp; //h
+class Declaration; //h
+class Final; //h
+class Equation; //h
 class Conditions;
-class Condition;
+class Condition; //h
 class If;
-class Elif;/////// ????
-class Else;/////// ????
+class Elif;
+class Else;
+class Loop;
 // ASTVisitor class defines a visitor pattern to traverse the AST
 class ASTVisitor
 {
@@ -149,13 +148,13 @@ public:
 class Equation : public Expr
 {
 private:
-  Factor *Left;                             // Left-hand side factor (identifier)
+  Final *Left;                             // Left-hand side factor (identifier)
   Expr *Right;                              // Right-hand side expression
 
 public:
-  Equation(Factor *L, Expr *R) : Left(L), Right(R) {}
+  Equation(Final *L, Expr *R) : Left(L), Right(R) {}
 
-  Factor *getLeft() { return Left; }
+  Final *getLeft() { return Left; }
 
   Expr *getRight() { return Right; }
 
@@ -298,6 +297,16 @@ class Else : public Expr {
   llvm::SmallVector<Equation *> EquationsGet() {return Equations;}
 
 
+}
+
+class Loop : public Expr{
+  private: 
+
+  Conditions *condition;
+  llvm::SmallVector<Equation *> Equations;
+
+  public: 
+  Loop(Conditions *con , llvm::SmallVector<Equation > *Equ) : condition(con), Equation(Equ){}
 }
 
 

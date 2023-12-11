@@ -45,7 +45,7 @@ void Lexer::next(Token &token)
         if (Name == "int")
             kind = Token::KW_int;
         else
-            kind = Token::ident;
+            kind = Token::id;
         // generate the token
         formToken(token, end, kind);
         return;
@@ -56,7 +56,7 @@ void Lexer::next(Token &token)
         const char *end = BufferPtr + 1;
         while (charinfo::isDigit(*end))
             ++end;
-        formToken(token, end, Token::number);
+        formToken(token, end, Token::num);
         return;
     }
     else
@@ -108,7 +108,7 @@ void Lexer::next(Token &token)
         else if (*BufferPtr == '<')
             formToken(token, BufferPtr + 1, Token::KW_lessThan);
         else if (*BufferPtr == ':')
-            formToken(token, BufferPtr + 1, Token::comma);
+            formToken(token, BufferPtr + 1, Token::KW_colon);
         return;
         /*switch (*BufferPtr)
         {
