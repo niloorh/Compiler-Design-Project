@@ -121,20 +121,23 @@ namespace
       case BinaryOp::Minus:
         V = Builder.CreateNSWSub(Left, Right);
         break;
-      case BinaryOp::equal:
-        V = Builder.CreateNSWMul(Left, Right);
-        break;
-      case BinaryOp::power:
-        V = Builder.CreateSDiv(Left, Right);
-        break;
       case BinaryOp::star:
-        V = Builder.CreateNSWAdd(Left, Right);
+        V = Builder.CreateNSWMul(Left, Right);
         break;
       case BinaryOp::slash:
-        V = Builder.CreateNSWSub(Left, Right);
+        V = Builder.CreateSDiv(Left, Right);
         break;
+      case BinaryOp::equal:
+        V = Builder.CreateNSWAdd(Left, Right);
+        break; //we dont know yet
+      case BinaryOp::power:
+        V = Builder.CreateNSWSub(Left, Right);
+        break; // we have to build
       case BinaryOp::KW_mod:
-        V = Builder.CreateNSWMul(Left, Right);
+        //V = Builder.CreateNSWMul(Left, Right);
+        Div = Builder.CreateSDiv(Left, Right); // q 
+        Mull = Builder.CreateNSWMul(Div, Right); // bq
+        V = Builder.CreateNSWSub(Left, Mull);//r=a_bq
         break;
       case BinaryOp::KW_plusEqual:
         V = Builder.CreateSDiv(Left, Right);
