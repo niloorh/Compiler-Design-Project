@@ -41,9 +41,8 @@ void Lexer::next(Token &token)
             ++end;
         llvm::StringRef Name(BufferPtr, end - BufferPtr);
         Token::TokenKind kind;
-        if (Name == "type")
-            kind = Token::KW_type;
-        else if (Name == "int")
+        
+        if (Name == "int")
             kind = Token::KW_int;
         else
             kind = Token::ident;
@@ -63,25 +62,25 @@ void Lexer::next(Token &token)
     else
     {
         if (*BufferPtr == '+' && *(BufferPtr+1) == '=')
-            formToken(token, BufferPtr + 2, Token::plus_equal);
+            formToken(token, BufferPtr + 2, Token::KW_plusEqual);
         else if (*BufferPtr == '-' && *(BufferPtr+1) == '=')
-            formToken(token, BufferPtr + 2, Token::minus_equal);
+            formToken(token, BufferPtr + 2, Token::KW_minusEqual);
         else if (*BufferPtr == '*' && *(BufferPtr+1) == '=')
-            formToken(token, BufferPtr + 2, Token::star_equal);
+            formToken(token, BufferPtr + 2, Token::KW_starEqual);
         else if (*BufferPtr == '/' && *(BufferPtr+1) == '=')
-            formToken(token, BufferPtr + 2, Token::slash_equal);
+            formToken(token, BufferPtr + 2, Token::KW_slashEqual);
         else if (*BufferPtr == '%' && *(BufferPtr+1) == '=')
-            formToken(token, BufferPtr + 2, Token::mod_equal);
+            formToken(token, BufferPtr + 2, Token::KW_modEq);
         else if (*BufferPtr == '^' && *(BufferPtr+1) == '=')
-            formToken(token, BufferPtr + 2, Token::power_equal);
+            formToken(token, BufferPtr + 2, Token::KW_poEq);
         else if (*BufferPtr == '>' && *(BufferPtr+1) == '=')
-            formToken(token, BufferPtr + 2, Token::greater_equal);
+            formToken(token, BufferPtr + 2, Token::KW_greaterEqual);
         else if (*BufferPtr == '<' && *(BufferPtr+1) == '=')
-            formToken(token, BufferPtr + 2, Token::lower_equal);
+            formToken(token, BufferPtr + 2, Token::KW_lessEqual);
         else if (*BufferPtr == '=' && *(BufferPtr+1) == '=')
-            formToken(token, BufferPtr + 2, Token::equal_equal);
+            formToken(token, BufferPtr + 2, Token::KW_EqEq);
         else if (*BufferPtr == '!' && *(BufferPtr+1) == '=')
-            formToken(token, BufferPtr + 2, Token::not_equal);
+            formToken(token, BufferPtr + 2, Token::KW_eqNot);
         else if (*BufferPtr == '+')
             formToken(token, BufferPtr + 1, Token::plus);
         else if (*BufferPtr == '-')
@@ -91,7 +90,7 @@ void Lexer::next(Token &token)
         else if (*BufferPtr == '/')
             formToken(token, BufferPtr + 1, Token::slash);
         else if (*BufferPtr == '%')
-            formToken(token, BufferPtr + 1, Token::mode);
+            formToken(token, BufferPtr + 1, Token::KW_mod);
         else if (*BufferPtr == '^')
             formToken(token, BufferPtr + 1, Token::power);
         else if (*BufferPtr == '(')
@@ -105,9 +104,9 @@ void Lexer::next(Token &token)
         else if (*BufferPtr == '=')
             formToken(token, BufferPtr + 1, Token::equal);
         else if (*BufferPtr == '>')
-            formToken(token, BufferPtr + 1, Token::greater);
+            formToken(token, BufferPtr + 1, Token::KW_greaterThan);
         else if (*BufferPtr == '<')
-            formToken(token, BufferPtr + 1, Token::lower);
+            formToken(token, BufferPtr + 1, Token::KW_lessThan);
         else if (*BufferPtr == ':')
             formToken(token, BufferPtr + 1, Token::comma);
         return;

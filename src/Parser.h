@@ -56,6 +56,7 @@ class Parser
     Expr *parseElse ();
     Expr *parseC ();
     Expr *parseLoop ();
+    Expr *parseConditions();
     
     
 

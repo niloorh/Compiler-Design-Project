@@ -8,13 +8,17 @@
 class AST;
 class Expr;
 class GSM;
-class Factor;
+//class Factor;
 class BinaryOp;// male ina ta haminjast
-class Assignment; // to do 
+//class Assignment; // to do 
 class Declaration;
 class Final;
 class Equation;
+class Conditions;
 class Condition;
+class If;
+class Elif;/////// ????
+class Else;/////// ????
 // ASTVisitor class defines a visitor pattern to traverse the AST
 class ASTVisitor
 {
@@ -29,8 +33,9 @@ public:
   virtual void visit(Declaration &) = 0;     // Visit the variable declaration node
   virtual void visit(Final &) = 0;
   virtual void visit(Condition &) = 0;
-
-
+  virtual void visit(If &) = 0;
+  virtual void visit(Elif &) = 0;
+  virtual void visit(Else &) = 0;
 };
 
 // AST class serves as the base class for all AST nodes
@@ -71,22 +76,20 @@ public:
   }
 };
 
-// Factor class represents a factor in the AST (either an identifier or a number)
-class Factor : public Expr
-{
-public:
-  enum ValueKind
-  {
-    Ident,
-    Number
+
+
+class Final  : public Expr{
+  public:
+  enum ValueKind{
+    id,
+    num
   };
+  private:
+   ValueKind Kind;
+   llvm::StringRef Val;
 
-private:
-  ValueKind Kind;                            // Stores the kind of factor (identifier or number)
-  llvm::StringRef Val;                       // Stores the value of the factor
-
-public:
-  Factor(ValueKind Kind, llvm::StringRef Val) : Kind(Kind), Val(Val) {}
+  ublic:
+  Final(ValueKind Kind, llvm::StringRef Val) : Kind(Kind), Val(Val) {}
 
   ValueKind getKind() { return Kind; }
 
@@ -97,6 +100,8 @@ public:
     V.visit(*this);
   }
 };
+// Factor class represents a factor in the AST (either an identifier or a number)
+
 
 // BinaryOp class represents a binary operation in the AST (plus, minus, multiplication, division)
 class BinaryOp : public Expr
@@ -184,5 +189,116 @@ public:
 
 
 
-class Condition : 
+
+
+class Conditions : public Expr {
+  public enum andOr {
+      KW_and,
+      KW_or
+  };
+
+
+  private :
+    Condition *Left;
+    andOr *AO;
+    Conditions *Right;
+
+  public :
+    Conditions(Condition *Left1 , andOr *AO1 , Conditions *Right1): Left(Left1) , AO(AO1) , Right(Right1) {}
+    Conditions *getLeft() { return Left; }
+    Conditions *getAO() {return AO; }
+    Conditions *getRight() {return Right; }
+
+
+    virtual void accept(ASTVisitor &V) {
+      V.visit(*this);
+    }
+
+
+};
+
+class Condition : public Conditions {
+public:
+  enum OperatorCondition {
+    KW_eqNot,       // !=
+    KW_EqEq,        // ==
+    KW_greaterEqual, // >=
+    KW_lessEqual,    // <=
+    KW_lessThan,     // <
+    KW_greaterThan,
+  };
+
+private:
+  Expr *Left;  // Left-hand side expression
+  Expr *Right; // Right-hand side expression
+  OperatorCondition Op;
+
+public:
+  Condition(OperatorCondition Op, Expr *L, Expr *R) : Op(Op), Left(L), Right(R) {}
+
+  Expr *getLeft() { return Left; }
+
+  Expr *getRight() { return Right; }
+
+  OperatorCondition getOperator() { return Op; }
+
+  virtual void accept(ASTVisitor &V) override {
+    V.visit(*this);
+  }
+};
+
+class If : public Expr {
+private:
+  Conditions *condition;
+  //llvm::SmallVector<Equation *> Conds;
+  llvm::SmallVector<Equation *> Equations;
+  llvm::SmallVector<Elif *> Elifs;
+  Else *Else;
+
+public:
+  If(Conditions *Conditions, llvm::SmallVector<Equation *> Equations, llvm::SmallVector<Elif *> Elifs, Else *Else) :
+    conditions(Conditions), Equations(Equations), Elifs(Elifs), Else(Else) {}
+
+  Condition *getCondition() { return conditions; }
+
+  llvm::SmallVector<Elif *> getElifs() { return Elifs; }
+
+  Else *getElse() { return Else; }
+
+  virtual void accept(ASTVisitor &V) override {
+    V.visit(*this);
+  }
+
+};
+
+
+class Elif : public Expr {
+  private : 
+  Conditions *condition;
+  llvm::SmallVector<Equation *> Equations;
+  //llvm::SmallVector<Elif *> Elifs;
+  //Else *Else;
+  public :
+  Elif(Conditions *cnd , llvm::SmallVector<Equation > *Equ ) : condition(cnd) , Equations(Equ){}
+  Condition *getCondition() {return condition; }
+  llvm::SmallVector<Equation *> EquationsGet() {return Equations;}
+
+
+}
+
+
+
+class Else : public Expr {
+  private :
+  Conditions *condition;
+  llvm::SmallVector<Equation *> Equations;
+  public :
+  Else(Conditions *cnd , llvm::SmallVector<Equation > *Equ ) : condition(cnd) , Equations(Equ){}
+  Condition *getCondition() {return condition; }
+  llvm::SmallVector<Equation *> EquationsGet() {return Equations;}
+
+
+}
+
+
 #endif
