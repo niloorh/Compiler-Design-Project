@@ -198,14 +198,14 @@ class Conditions : public Expr {
 
 
   private :
-    Condition *Left;
+    Conditions *Left;
     andOr *AO;
     Conditions *Right;
 
   public :
-    Conditions(Condition *Left1 , andOr *AO1 , Conditions *Right1): Left(Left1) , AO(AO1) , Right(Right1) {}
+    Conditions(Conditions *Left1 , andOr *AO1 , Conditions *Right1): Left(Left1) , AO(AO1) , Right(Right1) {}
     Conditions *getLeft() { return Left; }
-    Conditions *getAO() {return AO; }
+    andOr *getAO() {return AO; }
     Conditions *getRight() {return Right; }
 
 
@@ -233,7 +233,7 @@ private:
   OperatorCondition Op;
 
 public:
-  Condition(OperatorCondition Op, Expr *L, Expr *R) : Op(Op), Left(L), Right(R) {}
+  Conditions(OperatorCondition Op, Expr *L, Expr *R) : Op(Op), Left(L), Right(R) {}
 
   Expr *getLeft() { return Left; }
 
@@ -261,6 +261,7 @@ public:
   Condition *getCondition() { return conditions; }
 
   llvm::SmallVector<Elif *> getElifs() { return Elifs; }
+  llvm::SmallVector<Equation *> getEquations() { return Equations; }
 
   Else *getElse() { return Else; }
 
