@@ -40,23 +40,23 @@ class Parser
         return false;
     }
     // inja tarif kardim nonterminal
-    AST *parseNAN();
+    AST *parseGSM();
     Expr *parseStatement();
-    Expr *parseDec ();
+    Declaration *parseDec ();
     Expr *parseOperator ();
     Expr *parseOperatorCondition ();
-    Expr *parseEquation ();
+    Equation *parseEquation ();
     Expr *parseExpr();
-    Expr *parseTerm();
+    Expr  *parseTerm();
     Expr *parseFactor ();
-    Expr *parseFinal ();
-    Expr *parseCondition ();
-    Expr *parseIf ();
-    Expr *parseElif ();
-    Expr *parseElse ();
-    Expr *parseC ();
-    Expr *parseLoop ();
-    Expr *parseConditions();
+    Final *parseFinal ();
+    Condition *parseCondition ();
+    If *parseIf ();
+    Elif *parseElif ();
+    Else *parseElse ();
+    Conditions  *parseConditions ();
+    Loop *parseLoop ();
+   // Expr *parseConditions();
     
     
 

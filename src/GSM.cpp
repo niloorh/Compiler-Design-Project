@@ -37,16 +37,16 @@ int main(int argc, const char **argv)
     }
 
     // Perform semantic analysis on the AST.
-    Sema Semantic;
-    if (Semantic.semantic(Tree))
-    {
-        llvm::errs() << "Semantic errors occurred\n";
-        return 1;
-    }
+    //Sema Semantic;
+    //if (Semantic.semantic(Tree))
+    //{
+        //llvm::errs() << "Semantic errors occurred\n";
+      //  return 1;
+    //}
 
     // Generate code for the AST using a code generator.
-    CodeGen CodeGenerator;
-    CodeGenerator.compile(Tree);
+    //CodeGen CodeGenerator;
+    //CodeGenerator.compile(Tree);
 
     // The program executed successfully.
     return 0;

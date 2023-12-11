@@ -62,6 +62,16 @@ namespace
       }
     };
 
+    virtual void visit(Expr &Node)override{};
+   
+    virtual void visit(If &Node)override{};
+    virtual void visit(Elif &Node)override{};
+    virtual void visit(Else &Node)override{};
+    virtual void visit(Loop &Node)override{
+	    llvm::errs()<< "madarash" ;
+    };
+	
+	
     virtual void visit(Equation &Node) override
     {
       // Visit the right-hand side of the assignment and get its value.
@@ -215,60 +225,6 @@ namespace
         }
       }
     };
-
-
-    virtual void visit(If& Node) override
-    {
-      llvm::BasicBlock* IfCond = llvm::BasicBlock::Create(MainFn->getContect(), "if.cond" , MainFn);
-      llvm::BasicBlock* IfBodys = llvm::BasicBlock::Create(MainFn->getContect(), "if.body" , MainFn);
-      llvm::BasicBlock* IfAfter = llvm::BasicBlock::Create(MainFn->getContect(), "after.if" , MainFn);
-      
-      Builder.SetInsertPoint(IfCond);
-      Node.getCondition() ->accept(*this);
-      llvm::Value* ifCondVlue = V;
-      Builder.CreateCondBr(ifCondVlue , IfBodys , nullptr); 
-
-      Builder.SetInsertPoint(IfBodys);
-      //Node.getCondition() ->accept(*this);
-      llvm::SmallVector<Equation*> equations = Node.getEquations();
-      for (auto I = equations.begin(), E = equations.end(); I != E; ++I) {
-        (*I)->accept(*this);
-      }
-      Builder.CreateCondBr(IfAfter); 
-      
-
-
-      
-
-    }
-
-  void CGProcedure::emitStmt(WhileStatement *Stmt) {
-  // The basic block for the condition.
-  llvm::BasicBlock *WhileCondBB = llvm::BasicBlock::Create(
-      CGM.getLLVMCtx(), "while.cond", Fn);
-  // The basic block for the while body.
-  llvm::BasicBlock *WhileBodyBB = llvm::BasicBlock::Create(
-      CGM.getLLVMCtx(), "while.body", Fn);
-  // The basic block after the while statement.
-  llvm::BasicBlock *AfterWhileBB = llvm::BasicBlock::Create(
-      CGM.getLLVMCtx(), "after.while", Fn);
-
-  Builder.CreateBr(WhileCondBB);
-  sealBlock(Curr);
-  setCurr(WhileCondBB);
-  llvm::Value *Cond = emitExpr(Stmt->getCond());
-  Builder.CreateCondBr(Cond, WhileBodyBB, AfterWhileBB);
-
-  setCurr(WhileBodyBB);
-  emit(Stmt->getWhileStmts());
-  Builder.CreateBr(WhileCondBB);
-  sealBlock(Curr);
-  sealBlock(WhileCondBB);
-
-  setCurr(AfterWhileBB);
-}
-
-
   };
 }; // namespace
 
@@ -285,5 +241,3 @@ void CodeGen::compile(AST *Tree)
   // Print the generated module to the standard output.
   M->print(outs(), nullptr);
 }
-
-

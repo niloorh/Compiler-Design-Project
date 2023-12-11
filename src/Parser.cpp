@@ -20,13 +20,13 @@ AST *Parser::parseGSM()
             if (d1)
                 exprs.push_back(d1);
             else
-                goto _error();
+                goto _error;
             break;
 
             if (!Tok.is(Token::semicolon))
             {
                // error();
-                goto _error();
+                goto _error;
             }
 
         case Token::id:
@@ -35,13 +35,13 @@ AST *Parser::parseGSM()
             if (d2)
                 exprs.push_back(d2);
             else
-                goto _error();
+                goto _error;
             break;
 
             if (!Tok.is(Token::semicolon))
             {
                 //error();
-                goto _error();
+                goto _error;
             }
 
         case Token::KW_loopc:
@@ -50,7 +50,7 @@ AST *Parser::parseGSM()
             if (d3)
                 exprs.push_back(d3);
             else
-                goto _error();
+                goto _error;
             break;
 
             /*if (!Tok.is(Token::semicolon))
@@ -64,7 +64,7 @@ AST *Parser::parseGSM()
             if (d4)
                 exprs.push_back(d4);
             else
-                goto _error();
+                goto _error;
             break;
 
             // if (!Tok.is(Token::semicolon))
@@ -73,19 +73,19 @@ AST *Parser::parseGSM()
             //     goto _error2;
             // }
         default:
-            goto _error();
+            goto _error;
             break;
         }
         advance(); // TODO: watch this part
     }
-    return new NAN(exprs);
-_error2:
+    return new GSM(exprs);
+_error:
     while (Tok.getKind() != Token::eoi)
         advance();
     return nullptr;
 }
 
-Expr *Parser::parseDec()
+Declaration *Parser::parseDec()
 {
     Expr *E;
     llvm::SmallVector<llvm::StringRef, 8> Vars;
@@ -94,12 +94,12 @@ Expr *Parser::parseDec()
 
     advance();
     if (expect(Token::KW_int))
-        goto _error();
+        goto _error;
 
     advance();
 
     if (expect(Token::id))
-        goto _error();
+        goto _error;
     Vars.push_back(Tok.getText());
     advance();
 
@@ -107,7 +107,7 @@ Expr *Parser::parseDec()
     {
         advance();
         if (expect(Token::id))
-            goto _error();
+            goto _error;
         Vars.push_back(Tok.getText());
         advance();
     }
@@ -120,7 +120,7 @@ Expr *Parser::parseDec()
     }
 
     if (expect(Token::semicolon))
-        goto _error();
+        goto _error;
 
     return new Declaration(Vars, E);
 _error: // TODO: Check this later in case of error :)
@@ -129,7 +129,7 @@ _error: // TODO: Check this later in case of error :)
     return nullptr;
 }
 
-Expr *Parser::parseEquation()
+Equation *Parser::parseEquation()
 {
     Expr *E;
     BinaryOp::Operator Op;
@@ -138,7 +138,7 @@ Expr *Parser::parseEquation()
     {
         // error();
         // return nullptr;
-        goto _error();
+        goto _error;
     }
 
     advance();           // id += 2;
@@ -179,9 +179,14 @@ Expr *Parser::parseEquation()
     E = parseExpr();
     
     if (expect(Token::semicolon))
-        goto _error();
+        goto _error;
 
     return new Equation(Op,E); //MUST EDIT AST
+
+_error:
+    while (Tok.getKind() != Token::eoi)
+	    advance();
+    return nullptr;
 }
 
 Expr *Parser::parseExpr()
@@ -234,7 +239,7 @@ Expr *Parser::parseFactor()
     return Left;
 }
 
-Expr *Parser::parseFinal()
+Final *Parser::parseFinal()
 {
     Expr *Res = nullptr;
     switch (Tok.getKind())
@@ -277,17 +282,17 @@ If *Parser::parseIf() {
     llvm::SmallVector<Elif *> Elifs;
     ElseParse *Else;
     if(expect(Token::KW_if))
-        goto _error();
+        goto _error;
 
     advance();
     
     if(expect(Token::KW_colon))
-        goto _error();
+        goto _error;
     
     advance();
 
      if(expect(Token::KW_begin))
-        goto _error();
+        goto _error;
     
     advance();
 
@@ -300,7 +305,7 @@ If *Parser::parseIf() {
 
 
     if(expect(Token::KW_end))
-        goto _error();
+        goto _error;
     
     advance();
 
@@ -320,6 +325,12 @@ If *Parser::parseIf() {
 
     return new If(condits , Equations , Elifs , Else);
 
+_error:
+    while(Tok.getKind() != Token::eoi)
+	    advance();
+    return nullptr;
+
+
     
 }
 
@@ -331,17 +342,17 @@ Elif *Parser::parseElif()
     Conditions condits = parseConditions();
 
     if(expect(Token::KW_elif))
-        goto _error();
+        goto _error;
     
     advance();
 
     if(expect(Token::KW_colon))
-        goto _error();
+        goto _error;
     
     advance();
 
     if(expect(Token::KW_begin))
-        goto _error();
+        goto _error;
     
     advance();
 
@@ -351,12 +362,18 @@ Elif *Parser::parseElif()
         }
 
     if(expect(Token::KW_end))
-        goto _error();
+        goto _error;
     
     advance();
 
     
     return new ElifParse(condits , Equations);
+
+_error:
+    while (Tok.getKind() != Token::eoi)
+	    advance();
+    return nullptr;
+
 
 
 }
@@ -364,12 +381,12 @@ Elif *Parser::parseElif()
 Else *Parser::parseElse(){
     llvm::SmallVector<Equation *> Equations;
     if(expect(Token::KW_else))
-        goto _error();
+        goto _error;
     
     advance();
 
     if(expect(Token::KW_colon))
-        goto _error();
+        goto _error;
     
     advance();
 
@@ -381,13 +398,19 @@ Else *Parser::parseElse(){
 
 
     if(expect(Token::KW_end))
-        goto _error();
+        goto _error;
     
     advance();
 
 
 
     return new ElifParse(Equations);
+
+
+_error:
+    while(Tok.getKind() != Token::eoi)
+	    advance();
+    return nullptr;
 
 
 }
@@ -431,7 +454,7 @@ Condition *Parser::parseCondition () {
             else if (Tok.is(Token::KW_greaterThan))  
                 Op= Condition::OperatorCondition::KW_greaterThan;
             else 
-                goto _error();
+                goto _error;
 
 
 
@@ -449,7 +472,7 @@ Condition *Parser::parseCondition () {
 Loop *Parser:: parseLoop(){
     Loop *Res = nullptr;
     if(!Tok.is(Token::KW_loopc)){
-        goto _error();
+        goto _error;
 
     }
     advance();
@@ -458,14 +481,14 @@ Loop *Parser:: parseLoop(){
     advance();
 
     if(!Tok.is(Token::KW_colon)){
-        goto _error();
+        goto _error;
     }
 
     advance();
 
     if (!Tok.is(Token::KW_begin))
     {
-        goto _error();
+        goto _error;
     }
     advance();
     llvm::SmallVector<Equation*> Equ;
@@ -489,17 +512,12 @@ Loop *Parser:: parseLoop(){
 
     Res = new Loop(Conditions,Equation);
     return Res;
+_error:
+    while(Tok.getKind() != Token::eoi)
+	    advance();
+    return nullptr;
 }
 
-
-
-_error():
-   { while (Tok.getKind() != Token::eoi)
-    {
-        advance();
-    }
-    return nullptr;
-    }
 
 
 
