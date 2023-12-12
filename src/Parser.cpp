@@ -7,7 +7,7 @@ AST *Parser::parse()
     return Res;
 }
 
-AST *Parser::parseGSM()
+GSM *Parser::parseGSM() //changed
 {
     llvm::SmallVector<Expr *> exprs;
     while (!Tok.is(Token::eoi))
@@ -132,9 +132,11 @@ _error: // TODO: Check this later in case of error :)
 Equation *Parser::parseEquation()
 {
     Expr *E;
+    Final  *F;
+    F = (Final*)(parseFactor());
     BinaryOp::Operator Op;
 
-    if (!Tok.is(Token::id) /*&& !Tok.is(Token::num) && !Tok.is(Token::l_paren)*/)
+    if (!Tok.isOneOf(Token::plus, Token::minus , Token::equal, Token::power, Token::star, Token::slash , Token::KW_mod, Token::KW_plusEqual, Token::KW_minusEqual ,Token::KW_starEqual ,Token::KW_slashEqual , Token::KW_modEq))
     {
         // error();
         // return nullptr;
@@ -181,7 +183,7 @@ Equation *Parser::parseEquation()
     if (expect(Token::semicolon))
         goto _error;
 
-    return new Equation(Op,E); //MUST EDIT AST
+    return new Equation(F,E); //MUST EDIT AST
 
 _error:
     while (Tok.getKind() != Token::eoi)
@@ -228,7 +230,7 @@ Expr *Parser::parseTerm()
 Expr *Parser::parseFactor()
 {
     Expr *Left = parseFinal();
-    while (Tok.isOneOf(Token::power))
+    while (Tok.is(Token::power))
     {
         BinaryOp::Operator Op = BinaryOp::power;
         
@@ -239,17 +241,17 @@ Expr *Parser::parseFactor()
     return Left;
 }
 
-Final *Parser::parseFinal()
+Expr *Parser::parseFinal() //changed
 {
     Expr *Res = nullptr;
     switch (Tok.getKind())
     {
     case Token::num:
-        Res = new Factor(Final::num, Tok.getText());
+        Res = new Final(Final::ValueKind::num, Tok.getText());
         advance();
         break;
     case Token::id:
-        Res = new Factor(Final::id, Tok.getText());
+        Res = new Final(Final::ValueKind::id, Tok.getText());
         advance();
         break;
     case Token::l_paren:
@@ -277,10 +279,10 @@ Final *Parser::parseFinal()
 
 If *Parser::parseIf() {
 
-    Conditions condits = parseConditions();
+    Conditions  *condits = parseConditions();
     llvm::SmallVector<Equation *> Equations;
     llvm::SmallVector<Elif *> Elifs;
-    ElseParse *Else;
+    Else *Elsee;
     if(expect(Token::KW_if))
         goto _error;
 
@@ -297,8 +299,8 @@ If *Parser::parseIf() {
     advance();
 
     while(Tok.is(Token::id)){
-        Equation Eq = parseEquation();
-        Equations.push_back(E);
+        Equation *Eq = parseEquation();
+        Equations.push_back(Eq);
 
 
     }
@@ -310,20 +312,19 @@ If *Parser::parseIf() {
     advance();
 
     while(Tok.is(Token::KW_elif)){
-        ElifParse Ef;
-        Ef = parseElif();
+        Elif *Ef = parseElif();
         Elifs.push_back(Ef);
 
     }
 
     if(Tok.is(Token::KW_else))
-        Else = parseElif();
+        Elsee = parseElse();
 
 
 
 
 
-    return new If(condits , Equations , Elifs , Else);
+    return new If(condits , Equations , Elifs , Elsee);
 
 _error:
     while(Tok.getKind() != Token::eoi)
@@ -339,7 +340,8 @@ _error:
 Elif *Parser::parseElif()
 {
     llvm::SmallVector<Equation *> Equations;
-    Conditions condits = parseConditions();
+    Conditions *condits = parseConditions();
+    Elif *Res = nullptr;
 
     if(expect(Token::KW_elif))
         goto _error;
@@ -357,7 +359,7 @@ Elif *Parser::parseElif()
     advance();
 
     while(Tok.is(Token::id)){
-        Equation Eq = parseEquation();
+        Equation *Eq = parseEquation();
         Equations.push_back(Eq);
         }
 
@@ -367,7 +369,8 @@ Elif *Parser::parseElif()
     advance();
 
     
-    return new ElifParse(condits , Equations);
+    Res = new  Elif(condits , Equations);
+    return Res;
 
 _error:
     while (Tok.getKind() != Token::eoi)
@@ -380,6 +383,7 @@ _error:
 
 Else *Parser::parseElse(){
     llvm::SmallVector<Equation *> Equations;
+    Conditions *cond = parseConditions();
     if(expect(Token::KW_else))
         goto _error;
     
@@ -392,7 +396,7 @@ Else *Parser::parseElse(){
 
 
     while(Tok.is(Token::id)){
-        Equation Eq = parseEquation();
+        Equation *Eq = parseEquation();
         Equations.push_back(Eq);
         }
 
@@ -404,7 +408,7 @@ Else *Parser::parseElse(){
 
 
 
-    return new ElifParse(Equations);
+    return new Else(cond ,Equations);
 
 
 _error:
@@ -421,13 +425,13 @@ _error:
 Conditions *Parser::parseConditions(){
 
 
-    Conditions *Left = parseCondition();
+    Conditions *Left = parseConditions();
     while (Tok.isOneOf(Token::KW_and , Token::KW_or)){
-        Conditions :: andOr AO = 
-            Tok.is(Token::KW_and) ? Conditions::KW_and  : Conditions::KW_or;
+        Conditions::andOr AO = 
+            Tok.is(Token::KW_and) ? Conditions::andOr::andd  : Conditions::andOr::orr;
         advance();
-        Conditions *Right = parseCondition();
-        Left = new Conditions(AO , Left , Right);  
+        Conditions *Right = parseConditions();
+        Left = new Conditions(Left , AO  , Right);  
     }
 
     return Left;

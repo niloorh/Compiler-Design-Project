@@ -192,8 +192,8 @@ public:
 
 class Conditions : public AST {
 	public: enum andOr {
-      KW_and,
-      KW_or
+      andd,
+      orr
   };
 
 
@@ -205,7 +205,7 @@ class Conditions : public AST {
   public :
  
     Conditions(Conditions *Left1 , andOr *AO1 , Conditions *Right1): Left(Left1) , AO(AO1) , Right(Right1) {}
-    Conditions(){}
+   
   
     Conditions *getLeft() { return Left; }
     andOr *getAO() {return AO; }
@@ -237,7 +237,7 @@ private:
 
 public:
   
-  Condition(Expr *L,OperatorCondition Op, Expr *R) : Op(Op), Left(L), Right(R) {}
+  Condition(Expr *L,OperatorCondition Op, Expr *R) : Op(Op), Left(L), Right(R), Conditions() {}
 
   Expr *getLeft() { return Left; }
 
