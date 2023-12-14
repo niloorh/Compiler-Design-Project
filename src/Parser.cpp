@@ -455,7 +455,7 @@ Conditions *Parser::parseConditions(){
 Condition *Parser::parseCondition () {
 
     Expr *Left = parseExpr();
-    while (Tok.isOneOf(Token::KW_EqEq, Token::KW_eqNot , Token::KW_greaterEqual , Token::KW_lessEqual , Token::KW_lessThan , Token::KW_greaterThan)) {
+   // while (Tok.isOneOf(Token::KW_EqEq, Token::KW_eqNot , Token::KW_greaterEqual , Token::KW_lessEqual , Token::KW_lessThan , Token::KW_greaterThan)) {
         
         Condition::OperatorCondition Op;
             if (Tok.is(Token::KW_EqEq)) 
@@ -470,34 +470,47 @@ Condition *Parser::parseCondition () {
                 Op= Condition::OperatorCondition::KW_lessThan;
             else if (Tok.is(Token::KW_greaterThan))  
                 Op= Condition::OperatorCondition::KW_greaterThan;
-            else 
-                goto _error;
+            else {
+                while (Tok.getKind() != Token::eoi)
+                advance();
+                return nullptr;
+            }
 
 
 
             advance();
             Expr *Right = parseExpr();
-            Left = new Condition(Op, Left, Right);
+            
 
 
-    }
-    return Left;
+    
+    return new Condition( Left, Op, Right);;
+
+
+
 
 }
 
 //----------------
 Loop *Parser:: parseLoop(){
-    Loop *Res = nullptr;
+    
+    Conditions *conditions = parseConditions();
+    llvm::SmallVector<Equation*> Equ;
+
+
+
     if(!Tok.is(Token::KW_loopc)){
+        error();
         goto _error;
 
     }
     advance();
 
-    Conditions *Conditions = parseConditions;
-    advance();
+    
+    //advance();
 
     if(!Tok.is(Token::KW_colon)){
+        error();
         goto _error;
     }
 
@@ -505,30 +518,31 @@ Loop *Parser:: parseLoop(){
 
     if (!Tok.is(Token::KW_begin))
     {
+        error();
         goto _error;
     }
     advance();
-    llvm::SmallVector<Equation*> Equ;
+    
 
-    while(!Tok.is(Token::id)){
+    while(!Tok.is(Token::KW_end)){
         if(Tok.is(Token::id)){
-            Equation *e;
-            e = parseEquation();
+            Equation *e = parseEquation();
 
             if (!Tok.is(Token::semicolon))
             {
+                error();
                 goto _error;
             }
             if(e)
             {
-                Equation.push_back(e);
+                Equ.push_back(e);
             }
             
         }
     }
 
-    Res = new Loop(Conditions,Equation);
-    return Res;
+    return new Loop(conditions,Equ);
+    
 _error:
     while(Tok.getKind() != Token::eoi)
 	    advance();

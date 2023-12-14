@@ -281,13 +281,17 @@ class Elif : public Expr {
   private : 
   Conditions *condition;
   llvm::SmallVector<Equation *> Equations;
-  //llvm::SmallVector<Elif *> Elifs;
-  //Else *Else;
+
   public :
   
-  Elif(Conditions *cnd , llvm::SmallVector<Equation* > Equ ) : condition(cnd) , Equations(Equ) , Expr(){}
+  Elif(Conditions *condition , llvm::SmallVector<Equation* > Equations ) : condition(condition) , Equations(Equations) , Expr(){}
   Conditions *getCondition() {return condition; }
   llvm::SmallVector<Equation *> EquationsGet() {return Equations;}
+
+      virtual void accept(ASTVisitor &V) override
+    {
+        V.visit(*this);
+    }
 
 
 };
@@ -302,6 +306,11 @@ class Else : public Expr {
   Else(Conditions *cnd , llvm::SmallVector<Equation *> Equ ) : condition(cnd) , Equations(Equ), Expr(){}
   Conditions *getCondition() {return condition; }
   llvm::SmallVector<Equation *> EquationsGet() {return Equations;}
+
+      virtual void accept(ASTVisitor &V) override
+    {
+        V.visit(*this);
+    }
 
 
 };

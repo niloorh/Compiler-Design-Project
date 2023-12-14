@@ -1,0 +1,36 @@
+GSM-> (dec | equation | Loop | If)*
+
+
+dec -> " int" id (, id )* | id (, id )* = expr (, expr)*
+
+operator -> = | += | -= | *= | /= | %=
+
+
+operatorCondition -> == | != | <= | >=
+
+equation ->   id operator Expr
+
+expr -> term (( " + " | " -" ) term )*
+
+term -> factor (( " * " | " / " | " % " ) factor) *
+
+factor ->  final (( " ^ " ) final)*
+
+final -> id | num | "("Expr")"
+
+id -> [a-z AZ]+
+
+Num -> 0 | [1-9]([0-9])* 
+
+condition -> expr operatorCondition expr 
+
+If -> "if" C : Begin (equation)* end ((Elif)* | Else)
+
+Elif -> "elif" C : Begin (equation )* end
+
+Else -> "else" C : Begin (equation )* end
+
+C -> Condition ((and | or) Condition)*
+
+Loop -> loopc C : Begin (Equation )* end
+
