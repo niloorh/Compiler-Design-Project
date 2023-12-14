@@ -143,12 +143,15 @@ namespace
       case BinaryOp::power:
         V = Builder.CreateNSWSub(Left, Right);
         break; // we have to build
-      case BinaryOp::KW_mod:
-        //V = Builder.CreateNSWMul(Left, Right);
+      case BinaryOp::KW_mod:{
+	Value* Div;
+	Value* Mull;
+        V = Builder.CreateNSWMul(Left, Right);
         Div = Builder.CreateSDiv(Left, Right); // q 
         Mull = Builder.CreateNSWMul(Div, Right); // bq
         V = Builder.CreateNSWSub(Left, Mull);//r=a_bq
-        break;
+			    }
+       	break;
       case BinaryOp::KW_plusEqual:
         V = Builder.CreateSDiv(Left, Right);
         break;

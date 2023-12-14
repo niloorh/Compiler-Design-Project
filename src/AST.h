@@ -88,7 +88,7 @@ class Final  : public Expr{
    llvm::StringRef Val;
 
   public:
-  Final(ValueKind Kind, llvm::StringRef Val) : Kind(Kind), Val(Val) {}
+  Final(ValueKind Kind, llvm::StringRef Val) : Kind(Kind), Val(Val) , Expr(){}
 
   ValueKind getKind() { return Kind; }
 
@@ -130,7 +130,7 @@ private:
   Operator Op;                              // Operator of the binary operation
 
 public:
-  BinaryOp(Operator Op, Expr *L, Expr *R) : Op(Op), Left(L), Right(R) {}
+  BinaryOp(Operator Op, Expr *L, Expr *R) : Op(Op), Left(L), Right(R), Expr() {}
 
   Expr *getLeft() { return Left; }
 
@@ -152,7 +152,7 @@ private:
   Expr *Right;                              // Right-hand side expression
 
 public:
-  Equation(Final *L, Expr *R) : Left(L), Right(R) {}
+  Equation(Final *L, Expr *R) : Left(L), Right(R) , Expr() {}
 
   Final *getLeft() { return Left; }
 
@@ -172,7 +172,7 @@ class Declaration : public Expr
   Expr *E;                                  // Expression serving as the initializer
 
 public:
-  Declaration(llvm::SmallVector<llvm::StringRef, 8> Vars, Expr *E) : Vars(Vars), E(E) {}
+  Declaration(llvm::SmallVector<llvm::StringRef, 8> Vars, Expr *E) : Vars(Vars), E(E) , Expr(){}
 
   VarVector::const_iterator begin() { return Vars.begin(); }
 
@@ -199,16 +199,16 @@ class Conditions : public AST {
 
   private :
     Conditions *Left;
-    andOr *AO;
+    andOr AO;
     Conditions *Right;
 
   public :
  
-    Conditions(Conditions *Left1 , andOr *AO1 , Conditions *Right1): Left(Left1) , AO(AO1) , Right(Right1) {}
-   
+    Conditions(Conditions *Left1 , andOr AO1 , Conditions *Right1): Left(Left1) , AO(AO1) , Right(Right1) {}
+    Conditions() {}
   
     Conditions *getLeft() { return Left; }
-    andOr *getAO() {return AO; }
+    andOr getAO() {return AO; }
     Conditions *getRight() {return Right; }
 
 
@@ -237,7 +237,7 @@ private:
 
 public:
   
-  Condition(Expr *L,OperatorCondition Op, Expr *R) : Op(Op), Left(L), Right(R), Conditions() {}
+  Condition(Expr *L,OperatorCondition Op, Expr *R) :  Left(L), Op(Op), Right(R), Conditions() {}
 
   Expr *getLeft() { return Left; }
 
@@ -260,7 +260,7 @@ private:
 
 public:
   If(Conditions *condition, llvm::SmallVector<Equation *> Equations, llvm::SmallVector<Elif *> Elifs, Else *Elsee) :
-    condition(condition), Equations(Equations), Elifs(Elifs), Elsee(Elsee) {}
+    condition(condition), Equations(Equations), Elifs(Elifs), Elsee(Elsee) , Expr(){}
 
   Conditions *getCondition() { return condition; }
 
@@ -284,7 +284,8 @@ class Elif : public Expr {
   //llvm::SmallVector<Elif *> Elifs;
   //Else *Else;
   public :
-  Elif(Conditions *cnd , llvm::SmallVector<Equation* > Equ ) : condition(cnd) , Equations(Equ){}
+  
+  Elif(Conditions *cnd , llvm::SmallVector<Equation* > Equ ) : condition(cnd) , Equations(Equ) , Expr(){}
   Conditions *getCondition() {return condition; }
   llvm::SmallVector<Equation *> EquationsGet() {return Equations;}
 
@@ -298,7 +299,7 @@ class Else : public Expr {
   Conditions *condition;
   llvm::SmallVector<Equation *> Equations;
   public :
-  Else(Conditions *cnd , llvm::SmallVector<Equation *> Equ ) : condition(cnd) , Equations(Equ){}
+  Else(Conditions *cnd , llvm::SmallVector<Equation *> Equ ) : condition(cnd) , Equations(Equ), Expr(){}
   Conditions *getCondition() {return condition; }
   llvm::SmallVector<Equation *> EquationsGet() {return Equations;}
 
@@ -312,7 +313,7 @@ class Loop : public Expr{
   llvm::SmallVector<Equation *> Equations;
 
   public: 
-  Loop(Conditions *condition , llvm::SmallVector<Equation *> Equations) : condition(condition), Equations(Equations){}
+  Loop(Conditions *condition , llvm::SmallVector<Equation *> Equations) : condition(condition), Equations(Equations) , Expr(){}
   Conditions *getCondition(){return condition;}
   llvm::SmallVector<Equation *> getEquations() {return Equations;}
   virtual void accept(ASTVisitor &V) override {V.visit(*this);}

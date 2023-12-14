@@ -343,34 +343,47 @@ Elif *Parser::parseElif()
     Conditions *condits = parseConditions();
     Elif *Res = nullptr;
 
-    if(expect(Token::KW_elif))
+    if (!Tok.is(Token::KW_elif))
+    {
+        goto _error;
+    }
+    
+    advance();
+
+    if(!Tok.is(Token::KW_colon))
         goto _error;
     
     advance();
 
-    if(expect(Token::KW_colon))
+    if(!Tok.is(Token::KW_begin))
         goto _error;
     
     advance();
 
-    if(expect(Token::KW_begin))
-        goto _error;
-    
-    advance();
+    // while(Tok.is(Token::id)){
+    //     Equation *Eq = parseEquation();
+    //     Equations.push_back(Eq);
+    //     }
 
-    while(Tok.is(Token::id)){
-        Equation *Eq = parseEquation();
-        Equations.push_back(Eq);
+    while (!Tok.is(Token::KW_end)){
+        if(Tok.is(Token::id)){
+            Equation *eq = parseEquation();
+
+        
+        if (!Tok.is(Token::semicolon)){
+            error();
+            goto _error;
         }
 
-    if(expect(Token::KW_end))
-        goto _error;
+        if (eq) {
+            Equations.push_back(eq);
+        }
+        advance();
+    }
+    }
+   
+    return new  Elif(condits , Equations);
     
-    advance();
-
-    
-    Res = new  Elif(condits , Equations);
-    return Res;
 
 _error:
     while (Tok.getKind() != Token::eoi)
@@ -425,12 +438,12 @@ _error:
 Conditions *Parser::parseConditions(){
 
 
-    Conditions *Left = parseConditions();
+    Conditions *Left = parseCondition();
     while (Tok.isOneOf(Token::KW_and , Token::KW_or)){
         Conditions::andOr AO = 
             Tok.is(Token::KW_and) ? Conditions::andOr::andd  : Conditions::andOr::orr;
         advance();
-        Conditions *Right = parseConditions();
+        Conditions *Right = parseCondition();
         Left = new Conditions(Left , AO  , Right);  
     }
 
