@@ -49,7 +49,7 @@ class Parser
     Expr *parseExpr();
     Expr  *parseTerm();
     Expr *parseFactor ();
-    Final *parseFinal ();
+    Expr *parseFinal ();
     Condition *parseCondition ();
     If *parseIf ();
     Elif *parseElif ();
