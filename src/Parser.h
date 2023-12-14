@@ -40,7 +40,7 @@ class Parser
         return false;
     }
     // inja tarif kardim nonterminal
-    AST *parseGSM();
+    GSM *parseGSM();
     Expr *parseStatement();
     Declaration *parseDec ();
     Expr *parseOperator ();
