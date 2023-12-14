@@ -32,7 +32,7 @@ public:
 
   // Visit function for Factor nodes
   virtual void visit(Final &Node) override {
-    if (Node.getKind() == Factor::Ident) {
+    if (Node.getKind() == Final::id) {
       // Check if identifier is in the scope
       if (Scope.find(Node.getVal()) == Scope.end())
         error(Not, Node.getVal());
@@ -52,10 +52,10 @@ public:
     else
       HasError = true;
 
-    if (Node.getOperator() == BinaryOp::Operator::Div && right) {
-      Factor * f = (Factor *)right;
+    if (Node.getOperator() == BinaryOp::Operator::slash && right) {
+      Final * f = (Final *)right;
 
-      if (right && f->getKind() == Factor::ValueKind::Number) {
+      if (right && f->getKind() == Final::ValueKind::num) {
         int intval;
         f->getVal().getAsInteger(10, intval);
 
@@ -66,10 +66,10 @@ public:
       }
     }
   };
-
+  
   // Visit function for Assignment nodes
   virtual void visit(Equation &Node) override {
-    Factor *dest = Node.getLeft();
+    Final *dest = Node.getLeft();
 
     dest->accept(*this);
 
@@ -97,6 +97,19 @@ public:
     if (Node.getExpr())
       Node.getExpr()->accept(*this); // If the Declaration node has an expression, recursively visit the expression node
   };
+  
+  virtual void visit(Expr &Node) override {};
+  virtual void visit(Conditions &Node) override {};
+  virtual void visit(Condition &Node) override {};
+  virtual void visit(Elif &Node) override {};
+  virtual void visit(If &Node) override {};
+  virtual void visit(Else &Node) override {};
+  virtual void visit(Loop &Node) override {};
+
+
+
+
+  
 };
 }
 

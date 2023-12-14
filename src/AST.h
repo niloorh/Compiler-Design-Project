@@ -5,15 +5,15 @@
 #include "llvm/ADT/StringRef.h"
 
 // Forward declarations of classes used in the AST
-class AST; //h
-class Expr; 
-class GSM; //h
-class BinaryOp; //h
-class Declaration; //h
-class Final; //h
-class Equation; //h
-class Conditions;
-class Condition; //h
+class AST; //done
+class Expr; //done
+class GSM; //done
+class BinaryOp; //done
+class Declaration; //done
+class Final; //done
+class Equation; //done
+class Conditions;//done
+class Condition; //done
 class If;
 class Elif;
 class Else;
@@ -31,6 +31,7 @@ public:
   virtual void visit(Equation &) = 0;      // Visit the assignment expression node
   virtual void visit(Declaration &) = 0;     // Visit the variable declaration node
   virtual void visit(Condition &) = 0;
+  virtual void visit(Conditions &) = 0;
   virtual void visit(If &) = 0;
   virtual void visit(Elif &) = 0;
   virtual void visit(Else &) = 0;
