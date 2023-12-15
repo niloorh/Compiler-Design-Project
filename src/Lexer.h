@@ -13,21 +13,7 @@ class Token
 public:
     enum TokenKind : unsigned short
     {
-        // eoi,     // end of input
-        // unknown, // in case of error at the lexical level
-        // ident,
-        // number,
-        // equal,
-        // comma,
-        // semicolon,
-        // plus,
-        // minus,
-        // star,
-        // slash,
-        // l_paren,
-        // r_paren,
-        // KW_type,
-        // KW_int
+        
         eoi,     // end of input
         unknown, // in case of error at the lexical level
         id,

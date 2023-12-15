@@ -67,6 +67,8 @@ namespace
     virtual void visit(If &Node)override{};
     virtual void visit(Elif &Node)override{};
     virtual void visit(Else &Node)override{};
+    virtual void visit(Statements &Node)override{};
+    virtual void visit(Conditions &Node) override{};
     virtual void visit(Loop &Node)override{
 	    llvm::errs()<< "madarash" ;
     };
@@ -96,7 +98,7 @@ namespace
 
     virtual void visit(Final &Node) override
     {
-      if (Node.getKind() == Final::id)
+      if (Node.get_Kind() == Final::id)
       {
         // If the factor is an identifier, load its value from memory.
         V = Builder.CreateLoad(Int32Ty, nameMap[Node.getVal()]);
@@ -110,7 +112,7 @@ namespace
         V = ConstantInt::get(Int32Ty, intval, true);
       }
     };
-
+/*
     virtual void visit(BinaryOp &Node) override
     {
       
@@ -168,7 +170,7 @@ namespace
         V = Builder.CreateSDiv(Left, Right);
         break;
       }
-    };
+    }; */
 
    virtual void visit(Condition &Node) override
     {
@@ -206,15 +208,15 @@ namespace
     };
 
     virtual void visit(Declaration &Node) override
-    {
+    { /*
       Value *val = nullptr;
 
-      if (Node.getExpr())
+      if (Node.getExprs())
       {
         // If there is an expression provided, visit it and get its value.
-        Node.getExpr()->accept(*this);
+        Node.getExprs()->accept(*this);
         val = V;
-      }
+      } 
 
       // Iterate over the variables declared in the declaration statement.
       for (auto I = Node.begin(), E = Node.end(); I != E; ++I)
@@ -229,8 +231,9 @@ namespace
         {
           Builder.CreateStore(val, nameMap[Var]);
         }
-      }
+      } */
     };
+
   };
 }; // namespace
 

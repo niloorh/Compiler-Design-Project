@@ -9,15 +9,16 @@ class AST; //done
 class Expr; //done
 class GSM; //done
 class BinaryOp; //done
+class Statements;
 class Declaration; //done
 class Final; //done
 class Equation; //done
 class Conditions;//done
 class Condition; //done
-class If;
-class Elif;
-class Else;
-class Loop;
+class If; //done
+class Elif; //done
+class Else; //done
+class Loop; //done
 // ASTVisitor class defines a visitor pattern to traverse the AST
 class ASTVisitor
 {
@@ -26,6 +27,7 @@ public:
   virtual void visit(AST &) {}               // Visit the base AST node
   virtual void visit(Expr &) {}              // Visit the expression node
   virtual void visit(GSM &) = 0;             // Visit the group of expressions node
+  virtual void visit(Statements &) = 0;
   virtual void visit(Final &) = 0;          // Visit the factor node
   virtual void visit(BinaryOp &) = 0;        // Visit the binary operation node
   virtual void visit(Equation &) = 0;      // Visit the assignment expression node
@@ -49,26 +51,82 @@ public:
 // Expr class represents an expression in the AST
 class Expr : public AST
 {
-public:
-  Expr() {}
+
+public: 
+enum binaryOp {
+        plus,
+        minus,
+        star, 
+        slash,
+        power,
+        KW_mod,
 };
 
+private :
+    Expr *Left; 
+    Expr *Right; 
+    binaryOp binOp;      
+
+public:
+  Expr(binaryOp binOp, Expr *L, Expr *R) : 
+    binOp(binOp), Left(L), Right(R) {}
+    Expr() {}
+
+    Expr *getLeft() { return Left; }
+
+    Expr *getRight() { return Right; }
+
+    binaryOp getOperator() { return binOp; }
+
+     virtual void accept(ASTVisitor &V) override
+    {
+        V.visit(*this);
+    }
+
+};
+
+class Statements : public AST {
+public:
+  enum ifDecEqLoop{
+    IfKind,
+    DecKind,
+    LoopKind,
+    EqKind,
+  };
+
+  private :
+    ifDecEqLoop theKind;
+
+
+  public :
+    ifDecEqLoop getKind(){
+      return theKind;
+    }
+
+    Statements(ifDecEqLoop thekind) : theKind(thekind) {}
+      
+  virtual void accept(ASTVisitor &V) override
+    {
+        V.visit(*this);
+    }
+
+};
 // GSM class represents a group of expressions in the AST
 class GSM : public Expr
 {
-  using ExprVector = llvm::SmallVector<Expr *>;
+  
 
 private:
-  ExprVector exprs;                          // Stores the list of expressions
+  llvm::SmallVector<Statements *> statements;                
 
 public:
-  GSM(llvm::SmallVector<Expr *> exprs) : exprs(exprs) {}
+  GSM(llvm::SmallVector<Statements *> statements) : statements(statements) {}
 
-  llvm::SmallVector<Expr *> getExprs() { return exprs; }
+  llvm::SmallVector<Statements *> getStatements() { return statements; }
 
-  ExprVector::const_iterator begin() { return exprs.begin(); }
+  llvm::SmallVector<Statements *>::const_iterator begin() { return statements.begin(); }
 
-  ExprVector::const_iterator end() { return exprs.end(); }
+  llvm::SmallVector<Statements *>::const_iterator end() { return statements.end(); }
 
   virtual void accept(ASTVisitor &V) override
   {
@@ -91,7 +149,7 @@ class Final  : public Expr{
   public:
   Final(ValueKind Kind, llvm::StringRef Val) : Kind(Kind), Val(Val) , Expr(){}
 
-  ValueKind getKind() { return Kind; }
+  ValueKind get_Kind() { return Kind; }
 
   llvm::StringRef getVal() { return Val; }
 
@@ -104,7 +162,7 @@ class Final  : public Expr{
 
 
 // BinaryOp class represents a binary operation in the AST (plus, minus, multiplication, division)
-class BinaryOp : public Expr
+/*class BinaryOp : public Expr
 {
 public:
   enum Operator
@@ -143,21 +201,34 @@ public:
   {
     V.visit(*this);
   }
-};
+};  */
 
 // Assignment class represents an assignment expression in the AST
-class Equation : public Expr
+class Equation : public Statements
 {
+
+  public:
+  enum assigning{
+        KW_plusEqual, 
+        KW_minusEqual, 
+        KW_starEqual,
+        KW_slashEqual,
+        KW_modEq, 
+        equal,
+  };
 private:
-  Final *Left;                             // Left-hand side factor (identifier)
-  Expr *Right;                              // Right-hand side expression
+  Final *Left;                             
+  Expr *Right;       
+  assigning a;                       
 
 public:
-  Equation(Final *L, Expr *R) : Left(L), Right(R) , Expr() {}
+  Equation(Final *Left,assigning a,Expr *Right) : Left(Left), a(a), Right(Right) , Statements(Statements::ifDecEqLoop::EqKind) {}
 
   Final *getLeft() { return Left; }
 
   Expr *getRight() { return Right; }
+
+  assigning getAssign() {return a;}
 
   virtual void accept(ASTVisitor &V) override
   {
@@ -166,21 +237,32 @@ public:
 };
 
 // Declaration class represents a variable declaration with an initializer in the AST
-class Declaration : public Expr
+class Declaration : public Statements
 {
-  using VarVector = llvm::SmallVector<llvm::StringRef, 8>;
-  VarVector Vars;                           // Stores the list of variables
-  Expr *E;                                  // Expression serving as the initializer
+
+private:
+  llvm::SmallVector<llvm::StringRef, 8> Vars;                           // Stores the list of variables
+  llvm::SmallVector<Expr *> exprs;      
+  llvm::SmallVector<Statements *> statements;                           // Expression serving as the initializer
 
 public:
-  Declaration(llvm::SmallVector<llvm::StringRef, 8> Vars, Expr *E) : Vars(Vars), E(E) , Expr(){}
+  Declaration(llvm::SmallVector<llvm::StringRef, 8> Vars, llvm::SmallVector<Expr *> exprs) :
+   Vars(Vars), exprs(exprs) , Statements(Statements::ifDecEqLoop::DecKind) {}
 
-  VarVector::const_iterator begin() { return Vars.begin(); }
+    llvm::SmallVector<llvm::StringRef, 8> getVars()
+    {
+        return Vars;
+    }
 
-  VarVector::const_iterator end() { return Vars.end(); }
+    llvm::SmallVector<Expr *> getExprs()
+    {
+        return exprs;
+    }
+  llvm::SmallVector<Statements *>::const_iterator begin() { return statements.begin(); }
 
-  Expr *getExpr() { return E; }
+  llvm::SmallVector<Statements *>::const_iterator end() { return statements.end(); }
 
+  
   virtual void accept(ASTVisitor &V) override
   {
     V.visit(*this);
@@ -251,19 +333,21 @@ public:
   }
 };
 
-class If : public Expr {
+class If : public Statements {
 private:
   Conditions *condition;
-  //llvm::SmallVector<Equation *> Conds;
   llvm::SmallVector<Equation *> Equations;
   llvm::SmallVector<Elif *> Elifs;
   Else *Elsee;
 
 public:
   If(Conditions *condition, llvm::SmallVector<Equation *> Equations, llvm::SmallVector<Elif *> Elifs, Else *Elsee) :
-    condition(condition), Equations(Equations), Elifs(Elifs), Elsee(Elsee) , Expr(){}
+    condition(condition), Equations(Equations), Elifs(Elifs), Elsee(Elsee) ,Statements(Statements::ifDecEqLoop::IfKind){}
+
+  If() : Statements(Statements::ifDecEqLoop::IfKind) {}
 
   Conditions *getCondition() { return condition; }
+  
 
   llvm::SmallVector<Elif *> getElifs() { return Elifs; }
   llvm::SmallVector<Equation *>getEquations(){return Equations;}
@@ -278,14 +362,14 @@ public:
 };
 
 
-class Elif : public Expr {
+class Elif : public If {
   private : 
   Conditions *condition;
   llvm::SmallVector<Equation *> Equations;
 
   public :
   
-  Elif(Conditions *condition , llvm::SmallVector<Equation* > Equations ) : condition(condition) , Equations(Equations) , Expr(){}
+  Elif(Conditions *condition , llvm::SmallVector<Equation* > Equations ) : condition(condition) , Equations(Equations) , If(){}
   Conditions *getCondition() {return condition; }
   llvm::SmallVector<Equation *> EquationsGet() {return Equations;}
 
@@ -299,12 +383,12 @@ class Elif : public Expr {
 
 
 
-class Else : public Expr {
+class Else : public If {
   private :
   Conditions *condition;
   llvm::SmallVector<Equation *> Equations;
   public :
-  Else(Conditions *cnd , llvm::SmallVector<Equation *> Equ ) : condition(cnd) , Equations(Equ), Expr(){}
+  Else(Conditions *cnd , llvm::SmallVector<Equation *> Equ ) : condition(cnd) , Equations(Equ), If(){}
   Conditions *getCondition() {return condition; }
   llvm::SmallVector<Equation *> EquationsGet() {return Equations;}
 
@@ -316,14 +400,14 @@ class Else : public Expr {
 
 };
 
-class Loop : public Expr{
+class Loop : public Statements{
   private: 
 
   Conditions *condition;
   llvm::SmallVector<Equation *> Equations;
 
   public: 
-  Loop(Conditions *condition , llvm::SmallVector<Equation *> Equations) : condition(condition), Equations(Equations) , Expr(){}
+  Loop(Conditions *condition , llvm::SmallVector<Equation *> Equations) : condition(condition), Equations(Equations) , Statements(Statements::ifDecEqLoop::LoopKind){}
   Conditions *getCondition(){return condition;}
   llvm::SmallVector<Equation *> getEquations() {return Equations;}
   virtual void accept(ASTVisitor &V) override {V.visit(*this);}

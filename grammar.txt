@@ -1,5 +1,4 @@
-GSM-> (dec | equation | Loop | If)*
-
+GSM-> ( dec | equation | Loop | If)*
 
 dec -> " int" id (, id )* | id (, id )* = expr (, expr)*
 

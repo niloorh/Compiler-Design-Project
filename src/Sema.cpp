@@ -32,7 +32,7 @@ public:
 
   // Visit function for Factor nodes
   virtual void visit(Final &Node) override {
-    if (Node.getKind() == Final::id) {
+    if (Node.get_Kind() == Final::id) {
       // Check if identifier is in the scope
       if (Scope.find(Node.getVal()) == Scope.end())
         error(Not, Node.getVal());
@@ -40,7 +40,7 @@ public:
   };
 
   // Visit function for BinaryOp nodes
-  virtual void visit(BinaryOp &Node) override {
+/*  virtual void visit(BinaryOp &Node) override {
     if (Node.getLeft())
       Node.getLeft()->accept(*this);
     else
@@ -65,7 +65,7 @@ public:
         }
       }
     }
-  };
+  }; */
   
   // Visit function for Assignment nodes
   virtual void visit(Equation &Node) override {
@@ -73,12 +73,12 @@ public:
 
     dest->accept(*this);
 
-    if (dest->getKind() == Final::num) {
+    if (dest->get_Kind() == Final::num) {
         llvm::errs() << "Assignment destination must be an identifier.";
         HasError = true;
     }
 
-    if (dest->getKind() == Final::id) {
+    if (dest->get_Kind() == Final::id) {
       // Check if the identifier is in the scope
       if (Scope.find(dest->getVal()) == Scope.end())
         error(Not, dest->getVal());
@@ -89,13 +89,15 @@ public:
   };
 
   virtual void visit(Declaration &Node) override {
-    for (auto I = Node.begin(), E = Node.end(); I != E;
+    /*for (auto I = Node.begin(), E = Node.end(); I != E;
          ++I) {
       if (!Scope.insert(*I).second)
         error(Twice, *I); // If the insertion fails (element already exists in Scope), report a "Twice" error
     }
-    if (Node.getExpr())
-      Node.getExpr()->accept(*this); // If the Declaration node has an expression, recursively visit the expression node
+    if (Node.getExprs())
+      Node.getExprs()->accept(*this); // If the Declaration node has an expression, recursively visit the expression node
+
+      */
   };
   
   virtual void visit(Expr &Node) override {};
@@ -105,6 +107,7 @@ public:
   virtual void visit(If &Node) override {};
   virtual void visit(Else &Node) override {};
   virtual void visit(Loop &Node) override {};
+  virtual void visit(Statements &Node) override {};
 
 
 
