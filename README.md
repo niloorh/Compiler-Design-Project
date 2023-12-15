@@ -4,8 +4,8 @@
 
 -Assign Variables : a = 4; a += 4; , a -= 4; a /= 4; , a *= 4; , a%= 4; a ^= 4; 
 
--mathematics operation : x + y; , x - y ; , x * y ; , x / y ; , x % y ; , x ^ y;
+-mathematics operation :(x*y) ; , x + y; , x - y ; , x * y ; , x / y ; , x % y ; , x ^ y;
 
--Conditions (if , elif , else) 
+-Conditions (if , elif , else) : if x >= y : begin ... end , if x <= y : begin ... end , if x == y : begin ... end , if x > y : begin ... end , if x < y : begin ... end , if x != y : begin ... end , 
 
--Loops
+-Loops : loopc condition : begin ... end
