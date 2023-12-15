@@ -9,6 +9,7 @@ namespace charinfo
         return c == ' ' || c == '\t' || c == '\f' || c == '\v' ||
                c == '\r' || c == '\n';
     }
+    
 
     LLVM_READNONE inline bool isDigit(char c)
     {
@@ -37,9 +38,9 @@ void Lexer::next(Token &token)
     if (charinfo::isLetter(*BufferPtr) )
     {
         const char *end = BufferPtr + 1;
-        while (charinfo::isLetter(*end)|| charinfo::isDigit(*end))
+        while (charinfo::isLetter(*end) || charinfo::isDigit(*end))
             ++end;
-        llvm::StringRef Name(BufferPtr, end - BufferPtr);
+        llvm::StringRef Name(BufferPtr, end - BufferPtr); //   intdxfghjklgyfh , sw6 , 
         Token::TokenKind kind;
         
         if (Name == "int")
@@ -70,14 +71,14 @@ void Lexer::next(Token &token)
     else if (charinfo::isDigit(*BufferPtr))
     {
         const char *end = BufferPtr + 1;
-        while (charinfo::isDigit(*end))
+        while (charinfo::isDigit(*end)) //852369854
             ++end;
         formToken(token, end, Token::num);
         return;
     }
     else
     {
-        if (*BufferPtr == '+' && *(BufferPtr+1) == '=')
+        if (*BufferPtr == '+' && *(BufferPtr+1) == '=') //                   += 9
             formToken(token, BufferPtr + 2, Token::KW_plusEqual);
         else if (*BufferPtr == '-' && *(BufferPtr+1) == '=')
             formToken(token, BufferPtr + 2, Token::KW_minusEqual);

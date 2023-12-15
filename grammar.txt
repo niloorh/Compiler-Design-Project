@@ -1,15 +1,14 @@
-GSM-> ( dec | equation | Loop | If)*
+GSM-> ( dec | equation | Loop | If )*
 
 dec -> " int" id (, id )* | id (, id )* = expr (, expr)*
 
 operator -> = | += | -= | *= | /= | %=
 
-
 operatorCondition -> == | != | <= | >=
 
 equation ->   id operator Expr
 
-expr -> term (( " + " | " -" ) term )*
+expr -> term (( " + " | " - ") term )*
 
 term -> factor (( " * " | " / " | " % " ) factor) *
 
@@ -17,7 +16,7 @@ factor ->  final (( " ^ " ) final)*
 
 final -> id | num | "("Expr")"
 
-id -> [a-z AZ]+
+id -> [a-z A-Z]+
 
 Num -> 0 | [1-9]([0-9])* 
 
