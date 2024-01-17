@@ -9,14 +9,10 @@ class OptimizationVisitor : public ASTVisitor{
 
     std::vector<llvm::StringRef> liveVars;
 
-    
-    AST* M;
 
 
     OptimizationVisitor(){
         liveVars.push_back(llvm::StringRef("result"));
-
-        aliveIDinDec.push_back(llvm::StringRef("result"));    
     }
 
     bool mustRemove;
@@ -31,7 +27,7 @@ class OptimizationVisitor : public ASTVisitor{
   virtual void visit(Loop&) =0;
 
 virtual void visit(GSM &gsm){
-        auto stats = gsm.getEquations(); 
+        auto stats = gsm.getEquations(); //statements
         
 
         for (; stats.end() != stats.begin(); --stats.end()) {
@@ -41,7 +37,6 @@ virtual void visit(GSM &gsm){
             }
 }
         gsm.setEquations(stats);  
-
 }
 
     virtual void visit(Equation &statement){
@@ -57,13 +52,19 @@ virtual void visit(GSM &gsm){
         }
         mustRemove =  true;
     }
+
+
+
     virtual void visit(Expr &statement){
         auto leftValue = statement.getLeft();
         auto rightValue = statement.getRight();
         leftValue->accept(*this);
         rightValue->accept(*this);
-
     }
+
+
+
+
     virtual void visit(Final &statement){
         if(statement.getKind() == Final::ValueKind::Id){
             liveVars.push_back(statement.getVal());
@@ -72,12 +73,12 @@ virtual void visit(GSM &gsm){
             return;
         }
     }
-    virtual void visit(Declaration &statement){
+    virtual void visit(Declaration &statement){0
         llvm::StringRef leftValue = *(statement.getVars().begin());
         auto iter = find(liveVars.begin(), liveVars.end(), leftValue);
         if(iter != liveVars.end()){ //is live
             liveVars.erase(iter);
-            auto rV = *(statement.getExprs().begin());
+            auto rightValue = *(statement.getExprs().begin());
             rightValue->accept(*this);
             mustRemove = false;
             return;
