@@ -22,11 +22,9 @@ class OptimizationVisitor : public ASTVisitor{
     }
 
     bool mustRemove;
-  //virtual void visit(Statements &) = 0;
-  //virtual void visit(Final &) = 0;          
-  virtual void visit(BinaryOp &) = 0;        // Visit the binary operation node
-  virtual void visit(Equation &) = 0;      // Visit the assignment expression node
-  //virtual void visit(Declaration &) = 0;     // Visit the variable declaration node
+    
+  virtual void visit(BinaryOp &) = 0;        
+  virtual void visit(Equation &) = 0;      +9
   virtual void visit(Condition &) = 0;
   virtual void visit(Conditions &) = 0;
   virtual void visit(If &) = 0;
@@ -35,7 +33,7 @@ class OptimizationVisitor : public ASTVisitor{
   virtual void visit(Loop&) =0;
 
 virtual void visit(GSM &gsm){
-        auto stats = gsm.getStatements(); //statements
+        auto stats = gsm.getEquations(); //statements
 
 
         auto end = stats.end();
@@ -45,73 +43,58 @@ virtual void visit(GSM &gsm){
             (*end)->accept(*this);
             if (mustRemove) {
             stats.erase(end);
-            }
+            }//done
 }
-        gsm.setStatements(v);  
+        gsm.setEquations(stats);  
 
 }
 
 
-    virtual void visit(Statements &statement){
-        Final* lValue = statement.getLValue();
-        auto iter = find(liveVars.begin(), liveVars.end(), lValue->getVal());
+    virtual void visit(Equation &statement){
+        Final* leftValue = statement.getLValue();
+        auto iter = find(liveVars.begin(), liveVars.end(), leftValue->getVal());
         if(iter != liveVars.end()){
-            if(statement.getAssignmentOP() == Statements::AssOp::Assign){
+            if(statement.getAssignmentOP() == Equation::AssOp::Assign){
                 liveVars.erase(iter);
             }
             statement.getRValue()->accept(*this);
             mustRemove = false;
             return;
         }
-        mustRemove =  true;
+        mustRemove =  true;//???
     }
+    virtual void visit(Expr &statement){
+        auto leftValue = statement.getLeft();
+        auto rightValue = statement.getRight();
+        rightValue->accept(*this);
 
+        leftValue->accept(*this);
 
-        virtual void visit(Declaration &statement){
-        llvm::StringRef lValue = *(statement.getVars().begin());
-        auto iter = find(liveVars.begin(), liveVars.end(), lValue);
-        if(iter != liveVars.end()){
-            llvm::errs() << lValue;
-            liveVars.erase(iter);
-            auto rightV = *(statement.getExprs().begin());
-            rightV->accept(*this);
-            mustRemove = false;
-            return;
-        }
         
-        if(find(aliveIDinDec.begin(), aliveIDinDec.end(), lValue) == aliveIDinDec.end())
-            mustRemove = true;
-        else 
-            mustRemove = false;
-    }
-
-
-
-     virtual void visit(Expr &statement){
-        auto LValue = statement.getLeft();
-        auto RValue = statement.getRight();
-
-        LValue->accept(*this);
-
-        RValue->accept(*this);
         
     }
-
-
-        virtual void visit(Final &statement){
-        if(statement.getKind() == Final::ValueKind::Ident){
+    virtual void visit(Final &statement){
+        if(statement.getKind() == Final::ValueKind::Id){
             liveVars.push_back(statement.getVal());
             aliveIDinDec.push_back(statement.getVal());
         }
     }
-
-
-
-
-
+    virtual void visit(Declaration &statement){
+        llvm::StringRef leftValue = *(statement.getVars().begin());
+        auto iter = find(liveVars.begin(), liveVars.end(), leftValue);
+        if(iter != liveVars.end()){
+            llvm::errs() << leftValue;
+            liveVars.erase(iter);
+            auto rightValue = *(statement.getExprs().begin());
+            rightValue->accept(*this);
+            mustRemove = false;
+            return;
+        }
+        
+        mustRemove = (find(aliveIDinDec.begin(), aliveIDinDec.end(), leftValue) == aliveIDinDec.end()) ? true : false;
+    }
+       
 };
-
-
 
 
 class Optimization{
