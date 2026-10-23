@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "optional": "cpp",
-        "future": "cpp",
-        "*.def": "cpp"
-    }
-}
